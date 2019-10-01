@@ -1,0 +1,54 @@
+{
+  "externalMatchId": "m1",
+  "type": "LIVE",
+  "data": [
+    {
+      "playerId": "p1",
+      "events": {
+        "PASS": 5
+      }
+    },
+    {
+      "playerId": "p3",
+      "events": {
+        "PASS": 4,
+        "GOAL": 1
+      }
+    },
+    {
+      "playerId": "p4",
+      "events": {
+        "HIT": 2,
+        "FOL": 1
+      }
+    },
+    {
+      "playerId": "p14",
+      "events": {
+        "GOAL": 2,
+        "PASS": 3
+      }
+    },
+    {
+      "playerId": "p12",
+      "events": {
+        "GOAL": 1,
+        "HIT": 2
+      }
+    },
+    {
+      "playerId": "p15",
+      "events": {
+        "HIT": 2,
+        "FOL": 1
+      }
+    },
+    {
+      "playerId": "p11",
+      "events": {
+        "FOL": 2,
+        "HIT": 1
+      }
+    }
+  ]
+}

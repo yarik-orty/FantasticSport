@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <springProfile name="docker">
+        <include resource="cloudwatch-logback-extension.xml"/>
+        <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+            <CloudWatchLayout>
+                <Include name="thread" pattern="%t"/>
+                <Include name="logger" pattern="%c"/>
+                <Include name="stacktrace" pattern="%xEx{5}"/>
+                <MDC/>
+            </CloudWatchLayout>
+        </appender>
+        <appender name="CONSOLE" class="ch.qos.logback.classic.AsyncAppender">
+            <appender-ref ref="STDOUT"/>
+        </appender>
+    </springProfile>
+
+    <springProfile name="default">
+        <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+        <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+    </springProfile>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+</configuration>

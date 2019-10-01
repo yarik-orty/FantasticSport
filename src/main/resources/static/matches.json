@@ -1,0 +1,14 @@
+[
+  {
+    "externalId": "11111",
+    "date": "2019-08-30",
+    "homeTeam": "t1",
+    "awayTeam": "t2"
+  },
+  {
+    "externalId": "11112",
+    "date": "2019-08-30",
+    "homeTeam": "t3",
+    "awayTeam": "t4"
+  }
+]

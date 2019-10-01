@@ -1,0 +1,94 @@
+[
+  {
+    "externalId": "t1",
+    "teamName": "Chicago Bulls",
+    "players": [
+      {
+        "externalId": "p1",
+        "name": "Mikel Jordan",
+        "firstName": "Mikel",
+        "lastName": "Jordan",
+        "position": "PG",
+        "age": 55
+      },
+      {
+        "externalId": "p2",
+        "name": "Mikel Jordan2",
+        "firstName": "Mikel",
+        "lastName": "Jordan",
+        "position": "SG",
+        "age": 55
+      },
+      {
+        "externalId": "p3",
+        "name": "Mikel Jordan3",
+        "firstName": "Mikel",
+        "lastName": "Jordan",
+        "position": "SF",
+        "age": 55
+      },
+      {
+        "externalId": "p4",
+        "name": "Mikel Jordan4",
+        "firstName": "Mikel",
+        "lastName": "Jordan",
+        "position": "PF",
+        "age": 55
+      },
+      {
+        "externalId": "p5",
+        "name": "Mikel Jordan5",
+        "firstName": "Mikel",
+        "lastName": "Jordan",
+        "position": "C",
+        "age": 55
+      }
+    ]
+  },
+  {
+    "externalId": "t2",
+    "teamName": "Lakers",
+    "players": [
+      {
+        "externalId": "p11",
+        "name": "LeBron James",
+        "firstName": "LeBron",
+        "lastName": "James",
+        "position": "SG",
+        "age": 50
+      },
+      {
+        "externalId": "p12",
+        "name": "LeBron James2",
+        "firstName": "LeBron",
+        "lastName": "James",
+        "position": "PG",
+        "age": 50
+      },
+      {
+        "externalId": "p13",
+        "name": "LeBron James3",
+        "firstName": "LeBron",
+        "lastName": "James",
+        "position": "C",
+        "age": 50
+      },
+      {
+        "externalId": "p14",
+        "name": "LeBron James4",
+        "firstName": "LeBron",
+        "lastName": "James",
+        "position": "PF",
+        "age": 50
+      },
+      {
+        "externalId": "p15",
+        "name": "LeBron James5",
+        "firstName": "LeBron",
+        "lastName": "James",
+        "position": "SF",
+        "age": 50
+      }
+    ]
+  }
+]
