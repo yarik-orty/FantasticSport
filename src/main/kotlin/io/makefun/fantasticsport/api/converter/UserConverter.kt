@@ -1,22 +1,23 @@
 package io.makefun.fantasticsport.api.converter
 
 import io.makefun.fantasticsport.api.dto.LineupResponse
-import io.makefun.fantasticsport.api.dto.UserRequest
+import io.makefun.fantasticsport.api.dto.SignUpUser
 import io.makefun.fantasticsport.api.dto.UserResponse
 import io.makefun.fantasticsport.core.lineup.Lineup
 import io.makefun.fantasticsport.core.user.User
+import io.makefun.fantasticsport.core.user.UserTeam
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Component
 
 @Component
 class UserConverter(private val encoder: PasswordEncoder) {
 
-    fun convert(user: UserRequest): User {
+    fun convert(user: SignUpUser): User {
         return User(
                 email = user.email,
                 password = encoder.encode(user.password),
-                name = user.name,
-                team = user.team)
+                name = "",
+                team = UserTeam(""))
     }
 
     fun convert(user: User): UserResponse {

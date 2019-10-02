@@ -1,5 +1,6 @@
 package io.makefun.fantasticsport.core.user
 
+import io.makefun.fantasticsport.api.dto.UserRequest
 import io.makefun.fantasticsport.core.lineup.Lineup
 import io.makefun.fantasticsport.exception.BadRequestException
 import io.makefun.fantasticsport.exception.NotFoundException
@@ -20,6 +21,13 @@ class UserService(private val repository: UserRepository) {
         } else {
             repository.save(user)
         }
+    }
+
+    fun finishRegistration(userId: String, userRequest: UserRequest) {
+        val user = findById(userId)
+        user.name = userRequest.name
+        user.team = userRequest.team
+        repository.save(user)
     }
 
     fun findById(id: String): User {

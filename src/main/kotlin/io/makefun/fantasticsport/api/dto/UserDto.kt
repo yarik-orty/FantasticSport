@@ -2,9 +2,10 @@ package io.makefun.fantasticsport.api.dto
 
 import io.makefun.fantasticsport.core.user.UserTeam
 
-class UserRequest(val email: String,
-                  val password: String,
-                  val name: String,
+class SignUpUser(val email: String,
+                 val password: String)
+
+class UserRequest(val name: String,
                   val team: UserTeam)
 
 class UserResponse(val id: String,
