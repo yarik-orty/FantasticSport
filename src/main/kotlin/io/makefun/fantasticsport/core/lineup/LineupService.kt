@@ -18,8 +18,8 @@ class LineupService(private val userService: UserService,
     private val log = LoggerFactory.getLogger(this.javaClass.name)
 
     fun create(userId: String, lineup: LineupRequest) {
+        validateLineup(lineup)
         val user = userService.findById(userId)
-        if (!lineup.players.contains(lineup.captain)) throw LineupCaptainException("Captain id is not in lineup")
         val players = playerService.findByIds(lineup.players)
         val lineupEntity = Lineup(userId = user.id!!,
                 formation = lineup.formation, captain = lineup.captain, players = map(players))
@@ -29,35 +29,40 @@ class LineupService(private val userService: UserService,
 
     fun generate(userId: String, formation: Formation): List<Player> {
         val user = userService.findById(userId)
-        val allPlayers = playerService.findAll()
-        val players = mutableSetOf<Player>()
+        val players = playerService.findAll()
+        val lineupPlayers = mutableSetOf<Player>()
 
-        while (players.size < 5) {
-            val random = allPlayers.indices.shuffled().first()
-            players.add(allPlayers[random])
+        while (lineupPlayers.size < 5) {
+            val random = players.indices.shuffled().first()
+            lineupPlayers.add(players[random])
         }
 
         val lineup = Lineup(userId = user.id!!, formation = formation,
-                captain = players.first().id!!, players = map(players.toList()))
+                captain = lineupPlayers.first().id!!, players = map(lineupPlayers.toList()))
+
         log.info("About to save lineup for userId: ${user.id}")
-        // TODO: consider not to save lineup right away, but give player possibility to change it
         userService.saveLineUp(lineup)
 
-        return players.toList()
+        return lineupPlayers.toList()
     }
 
     fun findByUserId(userId: String): Lineup {
         val lineup = userService.findById(userId).lineup
                 ?: throw  NotFoundException("Lineup not found for user: $userId")
-        // TODO: if lineup is live go to redis
+        // Only if lineup is live go to redis
         lineup.players.forEach { it.score = redisTemplate.data[it.id]?.score ?: it.score }
         return lineup
     }
+
+    private fun validateLineup(lineup: LineupRequest) {
+        // TODO: validation for players and lineup
+        if (!lineup.players.contains(lineup.captain)) throw LineupCaptainException("Captain id is not in lineup")
+    }
+
+    private fun map(players: List<Player>): List<LineupPlayer> = players.map { map(it) }
 
     private fun map(player: Player): LineupPlayer {
         return LineupPlayer(id = player.id!!, externalId = player.externalId,
                 teamId = player.teamId, name = player.name, position = player.position)
     }
-
-    private fun map(players: List<Player>): List<LineupPlayer> = players.map { map(it) }
 }

@@ -17,7 +17,8 @@ class GameConverter {
                 name = game.name,
                 status = game.status,
                 type = game.type,
-                date = game.date,
+                startDate = game.startDate,
+                finishDate = game.finishDate,
                 stake = game.stake,
                 participants = game.participants)
     }

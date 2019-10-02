@@ -16,7 +16,8 @@ class GameResponse(val id: String,
                    val name: String,
                    val type: GameType,
                    var status: GameStatus,
-                   var date: LocalDate,
+                   var startDate: LocalDate? = null,
+                   var finishDate: LocalDate? = null,
                    var stake: Long = 0,
                    val participants: List<Participant> = emptyList())
 

@@ -26,7 +26,7 @@ class GameService(private val repository: GameRepository,
 
     fun create(userId: String, gameRequest: GameRequest) {
         val user = userService.findById(userId)
-        val lineup = user.lineup ?: throw LineupNotFoundException() // TODO: validate lineup as well
+        val lineup = user.lineup ?: throw LineupNotFoundException()
         if (user.wallet.amount < gameRequest.stake) throw BadRequestException("Not enough coins to play")
 
         val teams = lineup.players.map { it.teamId }.distinct().toList()
@@ -34,10 +34,10 @@ class GameService(private val repository: GameRepository,
 
         val participants = processParticipants(user, gameRequest)
         val tags = mutableSetOf(*matches.map { it.id!! }.toTypedArray())
-        val date = matches.first().date // TODO: Depends on random or not, also update on join
+        val startDate = matches.first().date
         val game = Game(name = gameRequest.name ?: "Default",
                 type = GameType.SINGLE, status = GameStatus.PENDING, random = gameRequest.random,
-                stake = gameRequest.stake, date = date, participants = participants, tags = tags)
+                stake = gameRequest.stake, startDate = startDate, participants = participants, tags = tags)
 
         log.info("About to save game: $game")
         val savedGame = repository.save(game)
@@ -63,6 +63,8 @@ class GameService(private val repository: GameRepository,
         game.join(user)
         val teams = lineup.players.map { it.teamId }.distinct().toList()
         val matches = matchService.findByTeamIds(teams)
+        val startDate = matches.first().date
+        game.startDate = if (game.startDate?.isBefore(startDate) == true) game.startDate else startDate
         game.tags.addAll(matches.map { it.id!! })
 
         repository.save(game)
@@ -151,7 +153,7 @@ class GameService(private val repository: GameRepository,
         game.finish()
         syncLive(users.flatMap { it.lineup!!.players })
         val participants = users.filter { user -> game.participants.map { it.userId }.contains(user.id) }
-        participants.forEach { it.score += it.lineup?.score() ?: 0; it.lineup = null } // TODO: to history?
+        participants.forEach { it.score += it.lineup?.score() ?: 0; it.lineup = null } // TODO: to history
         calculateReservation(game, participants)
         userService.saveAll(participants)
         // store players from redis to history
@@ -171,12 +173,19 @@ class GameService(private val repository: GameRepository,
     }
 
     private fun calculateReservation(game: Game, participants: List<User>) {
-        val winner = participants.maxBy { it.lineup!!.score() }!! // TODO: handle draw
+        val winner = participants.maxBy { it.lineup!!.score() }!!
         val loser = participants.find { it.id != winner.id }!!
-        val winnerAmount = participants.sumByLong { it.wallet.reserveBucket[game.id] ?: -1 }
-        loser.wallet.reserveBucket.remove(game.id)
-        winner.wallet.reserveBucket.remove(game.id)
-        winner.wallet.amount += winnerAmount
+        if (winner.lineup?.score() == loser.lineup?.score()) {
+            winner.wallet.amount += winner.wallet.reserveBucket[game.id] ?: 0
+            loser.wallet.amount += loser.wallet.reserveBucket[game.id] ?: 0
+            winner.wallet.reserveBucket.remove(game.id)
+            loser.wallet.reserveBucket.remove(game.id)
+        } else {
+            val winnerAmount = participants.sumByLong { it.wallet.reserveBucket[game.id] ?: 0 }
+            loser.wallet.reserveBucket.remove(game.id)
+            winner.wallet.reserveBucket.remove(game.id)
+            winner.wallet.amount += winnerAmount
+        }
     }
 
     private fun processParticipants(user: User, game: GameRequest): MutableList<Participant> {

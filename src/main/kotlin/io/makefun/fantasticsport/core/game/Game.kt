@@ -14,9 +14,9 @@ data class Game(
         val type: GameType,
         var status: GameStatus,
         var random: Boolean,
-        var date: LocalDate,
+        var startDate: LocalDate? = null,
         var finishDate: LocalDate? = null,
-        var stake: Long = 0,// TODO: move to participant?
+        var stake: Long = 0, // move stake to participant?
         val participants: MutableList<Participant> = mutableListOf(),
         val tags: MutableSet<String> = mutableSetOf()) {
 
@@ -51,5 +51,6 @@ enum class GameType {
 
 class Participant(val userId: String, val name: String,
                   var accepted: Boolean, val owner: Boolean) {
-    @Transient var score: Int = 0
+    @Transient
+    var score: Int = 0
 }

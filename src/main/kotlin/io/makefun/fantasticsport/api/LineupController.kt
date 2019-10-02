@@ -23,7 +23,6 @@ class LineupController(private val service: LineupService,
     @PostMapping("/create")
     fun create(@AuthenticationPrincipal authUser: AuthUser, @RequestBody lineup: LineupRequest) {
         log.info("Create lineup for user: {} with formation: {}", authUser.id, lineup.formation)
-        // TODO: some validation for players
         service.create(authUser.id, lineup)
     }
 
