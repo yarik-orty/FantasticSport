@@ -44,7 +44,7 @@ class GameService(private val repository: GameRepository,
 
         log.info("About to reserve coins for user: ${user.id}")
         user.wallet.reserveBucket[savedGame.id!!] = game.stake
-        user.wallet.amount = user.wallet.amount - game.stake
+        user.wallet.amount -= game.stake
         userService.save(user)
     }
 
@@ -57,7 +57,7 @@ class GameService(private val repository: GameRepository,
 
         log.info("About to reserve coins for user: ${user.id}")
         user.wallet.reserveBucket[game.id!!] = game.stake
-        user.wallet.amount = user.wallet.amount - game.stake
+        user.wallet.amount -= game.stake
         userService.save(user)
 
         game.join(user)
