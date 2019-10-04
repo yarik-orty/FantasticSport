@@ -24,50 +24,55 @@ class GameService(private val repository: GameRepository,
 
     private val log = LoggerFactory.getLogger(this.javaClass.name)
 
-    fun create(userId: String, gameRequest: GameRequest) {
+    fun create(userId: String, games: List<GameRequest>) {
         val user = userService.findById(userId)
         val lineup = user.lineup ?: throw LineupNotFoundException()
-        if (user.wallet.amount < gameRequest.stake) throw BadRequestException("Not enough coins to play")
+        if (user.wallet.amount < games.sumByLong { it.stake }) throw BadRequestException("Not enough coins to play")
 
         val teams = lineup.players.map { it.teamId }.distinct().toList()
         val matches = matchService.findByTeamIds(teams)
-
-        val participants = processParticipants(user, gameRequest)
         val tags = mutableSetOf(*matches.map { it.id!! }.toTypedArray())
-        val startDate = matches.first().date
-        val game = Game(name = gameRequest.name ?: "Default",
-                type = GameType.SINGLE, status = GameStatus.PENDING, random = gameRequest.random,
-                stake = gameRequest.stake, startDate = startDate, participants = participants, tags = tags)
 
-        log.info("About to save game: $game")
-        val savedGame = repository.save(game)
+        games.forEach {
+            val startDate = matches.first().date
+            val game = Game(name = it.name ?: "Default", type = GameType.SINGLE,
+                    status = GameStatus.PENDING, random = it.random, stake = it.stake,
+                    startDate = startDate, participants = processParticipants(user, it), tags = tags)
 
-        log.info("About to reserve coins for user: ${user.id}")
-        user.wallet.reserveBucket[savedGame.id!!] = game.stake
-        user.wallet.amount -= game.stake
+            log.info("About to save game: $game")
+            val savedGame = repository.save(game)
+
+            log.info("About to reserve ${game.stake} coins for user: ${user.id}")
+            user.wallet.reserveBucket[savedGame.id!!] = game.stake
+            user.wallet.amount -= game.stake
+        }
+
         userService.save(user)
     }
 
-    fun join(userId: String, gameId: String) {
+    fun join(userId: String, gameIds: List<String>) {
         val user = userService.findById(userId)
         val lineup = user.lineup ?: throw LineupNotFoundException()
-        val game = repository.findByIdOrNull(gameId) ?: throw NotFoundException("Game not found for id: $gameId")
+        val games = repository.findByIdIn(gameIds)
 
-        if (user.wallet.amount < game.stake) throw BadRequestException("Not enough coins to play")
+        if (games.isEmpty()) throw BadRequestException("Games not found for ids $gameIds")
+        if (user.wallet.amount < games.sumByLong { it.stake }) throw BadRequestException("Not enough coins to play")
 
-        log.info("About to reserve coins for user: ${user.id}")
-        user.wallet.reserveBucket[game.id!!] = game.stake
-        user.wallet.amount -= game.stake
-        userService.save(user)
-
-        game.join(user)
         val teams = lineup.players.map { it.teamId }.distinct().toList()
         val matches = matchService.findByTeamIds(teams)
         val startDate = matches.first().date
-        game.startDate = if (game.startDate?.isBefore(startDate) == true) game.startDate else startDate
-        game.tags.addAll(matches.map { it.id!! })
 
-        repository.save(game)
+        games.forEach { game ->
+            log.info("About to reserve ${game.stake} coins for user: ${user.id}")
+            user.wallet.reserveBucket[game.id!!] = game.stake
+            user.wallet.amount -= game.stake
+            game.join(user)
+            game.startDate = if (game.startDate?.isBefore(startDate) == true) game.startDate else startDate
+            game.tags.addAll(matches.map { it.id!! })
+        }
+
+        repository.saveAll(games)
+        userService.save(user)
     }
 
     fun gameTimeline(userId: String, gameId: String): GameTimelineResponse {

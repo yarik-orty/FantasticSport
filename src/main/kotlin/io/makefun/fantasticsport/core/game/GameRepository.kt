@@ -10,6 +10,8 @@ interface GameRepository : MongoRepository<Game, String> {
     @Query("{ 'participants.userId' : ?0 }")
     fun findByUserId(userId: String): List<Game>
 
+    fun findByIdIn(ids: List<String>): List<Game>
+
     fun findByRandomTrue(): List<Game>
 
     fun findByStatusAndTagsIn(status: GameStatus, matchId: String): List<Game>

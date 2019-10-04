@@ -29,15 +29,15 @@ class GameController(private val service: GameService,
     }
 
     @PostMapping("/create")
-    fun create(@AuthenticationPrincipal authUser: AuthUser, @RequestBody gameRequest: GameRequest) {
+    fun create(@AuthenticationPrincipal authUser: AuthUser, @RequestBody games: List<GameRequest>) {
         log.info("Create single game")
-        service.create(authUser.id, gameRequest)
+        service.create(authUser.id, games)
     }
 
     @PostMapping("/join")
-    fun join(@AuthenticationPrincipal authUser: AuthUser, @RequestParam gameId: String) {
-        log.info("Join to game with gameId: {}", gameId)
-        service.join(authUser.id, gameId)
+    fun join(@AuthenticationPrincipal authUser: AuthUser, @RequestParam gameIds: List<String>) {
+        log.info("Join to game with id: {}", gameIds.toString())
+        service.join(authUser.id, gameIds)
     }
 
     @GetMapping("/available")
