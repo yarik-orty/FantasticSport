@@ -18,7 +18,8 @@ class LineupService(private val userService: UserService,
     private val log = LoggerFactory.getLogger(this.javaClass.name)
 
     fun create(userId: String, lineup: LineupRequest) {
-        validateLineup(lineup)
+        // TODO: validation for players and lineup
+        if (!lineup.players.contains(lineup.captain)) throw LineupCaptainException("Captain id is not in lineup")
         val user = userService.findById(userId)
         val players = playerService.findByIds(lineup.players)
         val lineupEntity = Lineup(userId = user.id!!,
@@ -32,7 +33,7 @@ class LineupService(private val userService: UserService,
         val players = playerService.findAll()
         val lineupPlayers = mutableSetOf<Player>()
 
-        while (lineupPlayers.size < 5) {
+        while (lineupPlayers.size < MIN_PLAYERS) {
             val random = players.indices.shuffled().first()
             lineupPlayers.add(players[random])
         }
@@ -49,20 +50,17 @@ class LineupService(private val userService: UserService,
     fun findByUserId(userId: String): Lineup {
         val lineup = userService.findById(userId).lineup
                 ?: throw  NotFoundException("Lineup not found for user: $userId")
-        // Only if lineup is live go to redis
+        // Only if lineup is live go to Redis
         lineup.players.forEach { it.score = redisTemplate.data[it.id]?.score ?: it.score }
         return lineup
     }
 
-    private fun validateLineup(lineup: LineupRequest) {
-        // TODO: validation for players and lineup
-        if (!lineup.players.contains(lineup.captain)) throw LineupCaptainException("Captain id is not in lineup")
-    }
-
     private fun map(players: List<Player>): List<LineupPlayer> = players.map { map(it) }
 
-    private fun map(player: Player): LineupPlayer {
-        return LineupPlayer(id = player.id!!, externalId = player.externalId,
-                teamId = player.teamId, name = player.name, position = player.position)
+    private fun map(player: Player): LineupPlayer = LineupPlayer(player.id!!, player.externalId, player.teamId, player.name, player.position)
+
+    companion object {
+
+        private const val MIN_PLAYERS = 5
     }
 }
